@@ -1,8 +1,12 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
-from .forms import ChamadoForm, ComentarioForm
-from .forms import ChamadoForm
 from .models import Chamado
+from .forms import (
+    ChamadoForm,
+    ComentarioForm,
+    StatusChamadoForm,
+    ResponsavelChamadoForm
+)
 
 def usuario_eh_ti(user):
     return user.groups.filter(name='TI').exists()
@@ -74,24 +78,82 @@ def detalhe_chamado(request, id):
 
     if request.method == 'POST':
 
-        form = ComentarioForm(request.POST)
+        # Alteração de responsável pelo TI
+        if usuario_eh_ti(request.user) and 'responsavel' in request.POST:
 
-        if form.is_valid():
-
-            comentario = form.save(commit=False)
-
-            comentario.chamado = chamado
-            comentario.usuario = request.user
-
-            comentario.save()
-
-            return redirect(
-                'detalhe_chamado',
-                id=chamado.id
+            form_responsavel = ResponsavelChamadoForm(
+                request.POST,
+                instance=chamado
             )
 
+            if form_responsavel.is_valid():
+
+                form_responsavel.save()
+
+                return redirect(
+                    'detalhe_chamado',
+                    id=chamado.id
+                )
+
+        # Alteração de status pelo TI
+        elif usuario_eh_ti(request.user) and 'status' in request.POST:
+
+            form_status = StatusChamadoForm(
+                request.POST,
+                instance=chamado
+            )
+
+            if form_status.is_valid():
+
+                chamado = form_status.save(commit=False)
+
+                if chamado.status == 'CONCLUIDO':
+
+                    from django.utils import timezone
+
+                    chamado.data_conclusao = timezone.now()
+
+                else:
+
+                    chamado.data_conclusao = None
+
+                chamado.save()
+
+                return redirect(
+                    'detalhe_chamado',
+                    id=chamado.id
+                )
+
+        # Adição de comentário
+        else:
+
+            form = ComentarioForm(request.POST)
+
+            if form.is_valid():
+
+                comentario = form.save(commit=False)
+
+                comentario.chamado = chamado
+                comentario.usuario = request.user
+
+                comentario.save()
+
+                return redirect(
+                    'detalhe_chamado',
+                    id=chamado.id
+                )
+
     else:
+
         form = ComentarioForm()
+
+    form_status = StatusChamadoForm(
+        instance=chamado
+    )
+
+    form_responsavel = ResponsavelChamadoForm(
+        instance=chamado
+    )
 
     return render(
         request,
@@ -100,5 +162,49 @@ def detalhe_chamado(request, id):
             'chamado': chamado,
             'comentarios': comentarios,
             'form': form,
+            'form_status': form_status,
+            'form_responsavel': form_responsavel,
+            'is_ti': usuario_eh_ti(request.user),
+        }
+    )
+
+@login_required
+def central_ti(request):
+
+    if not usuario_eh_ti(request.user):
+        return redirect('home')
+
+    total_abertos = Chamado.objects.filter(
+        status='ABERTO'
+    ).count()
+
+    total_em_atendimento = Chamado.objects.filter(
+        status='EM_ATENDIMENTO'
+    ).count()
+
+    total_concluidos = Chamado.objects.filter(
+        status='CONCLUIDO'
+    ).count()
+
+    total_urgentes = Chamado.objects.filter(
+        prioridade='URGENTE'
+    ).count()
+
+    chamados_recentes = Chamado.objects.select_related(
+        'solicitante',
+        'responsavel'
+    ).order_by(
+        '-data_abertura'
+    )[:10]
+
+    return render(
+        request,
+        'chamados/central_ti.html',
+        {
+            'total_abertos': total_abertos,
+            'total_em_atendimento': total_em_atendimento,
+            'total_concluidos': total_concluidos,
+            'total_urgentes': total_urgentes,
+            'chamados_recentes': chamados_recentes,
         }
     )

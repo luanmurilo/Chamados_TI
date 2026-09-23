@@ -1,6 +1,6 @@
 from django import forms
 from .models import Chamado, ComentarioChamado
-
+from django.contrib.auth.models import User
 
 class ChamadoForm(forms.ModelForm):
 
@@ -80,3 +80,38 @@ class ComentarioForm(forms.ModelForm):
                 'rows': 4,
             }),
         }
+
+class StatusChamadoForm(forms.ModelForm):
+
+    class Meta:
+        model = Chamado
+
+        fields = [
+            'status',
+        ]
+
+        widgets = {
+            'status': forms.Select(),
+        }
+
+class ResponsavelChamadoForm(forms.ModelForm):
+
+    class Meta:
+        model = Chamado
+
+        fields = [
+            'responsavel',
+        ]
+
+        widgets = {
+            'responsavel': forms.Select(),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.fields['responsavel'].queryset = User.objects.filter(
+            groups__name='TI'
+        ).order_by('first_name', 'username')
+
+        self.fields['responsavel'].empty_label = 'Ainda não atribuído'

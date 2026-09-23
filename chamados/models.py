@@ -44,9 +44,12 @@ class Chamado(models.Model):
         default='ABERTO'
     )
 
-    responsavel = models.CharField(
-        max_length=150,
-        blank=True
+    responsavel = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='chamados_responsaveis'
     )
 
     data_abertura = models.DateTimeField(auto_now_add=True)

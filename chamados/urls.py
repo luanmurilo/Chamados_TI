@@ -22,4 +22,10 @@ urlpatterns = [
         views.detalhe_chamado,
         name='detalhe_chamado'
     ),
+
+    path(
+        'central-ti/',
+        views.central_ti,
+        name='central_ti'
+    ),
 ]

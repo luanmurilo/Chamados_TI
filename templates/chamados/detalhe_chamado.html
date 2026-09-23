@@ -134,8 +134,210 @@
         .btn:hover {
             background: #4f46e5;
         }
+        .responsavel-form {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .responsavel-form select {
+            background: #0f172a;
+            color: #e2e8f0;
+            border: 1px solid #475569;
+            border-radius: 7px;
+            padding: 9px 12px;
+            font-size: 14px;
+        }
+
+        .responsavel-form button {
+            background: #6366f1;
+            color: white;
+            border: none;
+            border-radius: 7px;
+            padding: 9px 14px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .responsavel-form button:hover {
+            background: #4f46e5;
+        }
+        .status-form {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .status-form select {
+            background: #0f172a;
+            color: #e2e8f0;
+            border: 1px solid #475569;
+            border-radius: 7px;
+            padding: 9px 12px;
+            font-size: 14px;
+        }
+
+        .status-form button {
+            background: #6366f1;
+            color: white;
+            border: none;
+            border-radius: 7px;
+            padding: 9px 14px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .status-form button:hover {
+            background: #4f46e5;
+        }
+        .historico {
+            margin-top: 25px;
+            padding-top: 25px;
+            border-top: 1px solid #334155;
+        }
+
+        .historico-titulo {
+            font-size: 16px;
+            font-weight: bold;
+            color: #f8fafc;
+            margin-bottom: 18px;
+        }
+
+        .comentarios {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .comentario {
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 10px;
+            padding: 14px 16px;
+        }
+
+        .comentario-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+
+        .comentario-header strong {
+            color: #c7d2fe;
+            font-size: 14px;
+        }
+
+        .comentario-header span {
+            color: #64748b;
+            font-size: 12px;
+        }
+
+        .comentario-mensagem {
+            color: #e2e8f0;
+            font-size: 14px;
+            line-height: 1.6;
+            word-break: break-word;
+        }
+
+        .sem-comentarios {
+            color: #64748b;
+            font-size: 14px;
+            padding: 15px 0;
+        }
+        .adicionar-comentario {
+            margin-top: 25px;
+            padding-top: 25px;
+            border-top: 1px solid #334155;
+        }
+
+        .comentario-titulo {
+            font-size: 16px;
+            font-weight: bold;
+            color: #f8fafc;
+            margin-bottom: 15px;
+        }
+
+        .comentario-form {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .comentario-form textarea {
+            width: 100%;
+            min-height: 110px;
+
+            background: #0f172a;
+            color: #e2e8f0;
+
+            border: 1px solid #475569;
+            border-radius: 8px;
+
+            padding: 12px;
+
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+
+            resize: vertical;
+        }
+
+        .comentario-form textarea::placeholder {
+            color: #64748b;
+        }
+
+        .comentario-form textarea:focus {
+            outline: none;
+            border-color: #6366f1;
+        }
+
+        .comentario-form button {
+            align-self: flex-start;
+
+            background: #6366f1;
+            color: white;
+
+            border: none;
+            border-radius: 7px;
+
+            padding: 10px 16px;
+
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .comentario-form button:hover {
+            background: #4f46e5;
+        }
 
         @media (max-width: 600px) {
+            .comentario-form button {
+                width: 100%;
+            }
+            .comentario-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 5px;
+            }
+            .status-form {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .status-form select,
+            .status-form button {
+                width: 100%;
+            }
+            .responsavel-form {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .responsavel-form select,
+            .responsavel-form button {
+                width: 100%;
+            }
 
             main {
                 margin: 20px auto;
@@ -257,9 +459,27 @@
 
                     <div class="value">
 
-                        <span class="badge status">
-                            {{ chamado.get_status_display }}
-                        </span>
+                        {% if is_ti %}
+
+                            <form method="post" class="status-form">
+
+                                {% csrf_token %}
+
+                                {{ form_status.status }}
+
+                                <button type="submit">
+                                    Atualizar status
+                                </button>
+
+                            </form>
+
+                        {% else %}
+
+                            <span class="badge status">
+                                {{ chamado.get_status_display }}
+                            </span>
+
+                        {% endif %}
 
                     </div>
 
@@ -288,7 +508,35 @@
                     </div>
 
                     <div class="value">
-                        {{ chamado.responsavel|default:"Ainda não atribuído" }}
+
+                        {% if is_ti %}
+
+                            <form method="post" class="responsavel-form">
+
+                                {% csrf_token %}
+
+                                {{ form_responsavel.responsavel }}
+
+                                <button type="submit">
+                                    Atribuir responsável
+                                </button>
+
+                            </form>
+
+                        {% else %}
+
+                            {% if chamado.responsavel %}
+
+                                {{ chamado.responsavel.get_full_name|default:chamado.responsavel.username }}
+
+                            {% else %}
+
+                                Ainda não atribuído
+
+                            {% endif %}
+
+                        {% endif %}
+
                     </div>
 
                 </div>
@@ -315,8 +563,11 @@
                     </div>
 
                 </div>
-                <div class="info-item">
-                    <span class="label">Histórico de atendimento</span>
+                <div class="historico">
+
+                    <div class="historico-titulo">
+                        Histórico de atendimento
+                    </div>
 
                     <div class="comentarios">
 
@@ -325,6 +576,7 @@
                             <div class="comentario">
 
                                 <div class="comentario-header">
+
                                     <strong>
                                         {{ comentario.usuario.get_full_name|default:comentario.usuario.username }}
                                     </strong>
@@ -332,6 +584,7 @@
                                     <span>
                                         {{ comentario.data_criacao|date:"d/m/Y H:i" }}
                                     </span>
+
                                 </div>
 
                                 <div class="comentario-mensagem">
@@ -342,33 +595,34 @@
 
                         {% empty %}
 
-                            <p>Nenhum comentário registrado.</p>
+                            <div class="sem-comentarios">
+                                Nenhum comentário registrado.
+                            </div>
 
                         {% endfor %}
 
                     </div>
+
                 </div>
+                <div class="adicionar-comentario">
 
-
-
-
-                    <div class="info-item">
-
-                        <span class="label">Adicionar comentário</span>
-
-                        <form method="post">
-
-                            {% csrf_token %}
-
-                            {{ form.mensagem }}
-
-                            <button type="submit">
-                                Enviar comentário
-                            </button>
-
-                        </form>
-
+                    <div class="comentario-titulo">
+                        Adicionar comentário
                     </div>
+
+                    <form method="post" class="comentario-form">
+
+                        {% csrf_token %}
+
+                        {{ form.mensagem }}
+
+                        <button type="submit">
+                            Enviar comentário
+                        </button>
+
+                    </form>
+
+                </div>
 
                 </div>
 

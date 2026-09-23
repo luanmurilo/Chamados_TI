@@ -137,9 +137,22 @@
                 Olá, {{ request.user.username }}
             </span>
 
-            <a href="{% url 'logout' %}" class="logout">
-                Sair
-            </a>
+            <form method="post" action="{% url 'logout' %}">
+                {% csrf_token %}
+
+                <button
+                    type="submit"
+                    style="
+                        background: none;
+                        border: none;
+                        color: #cbd5e1;
+                        cursor: pointer;
+                        font-size: 16px;
+                    "
+                >
+                    Sair
+                </button>
+            </form>
 
         </div>
 
