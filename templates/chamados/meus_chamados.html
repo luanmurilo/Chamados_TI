@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Meus Chamados - TI</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #0f172a;
+            color: #e2e8f0;
+            min-height: 100vh;
+        }
+
+        header {
+            background: #1e293b;
+            padding: 20px 30px;
+            border-bottom: 1px solid #334155;
+        }
+
+        header a {
+            color: #94a3b8;
+            text-decoration: none;
+        }
+
+        main {
+            max-width: 1100px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        h1 {
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            color: #94a3b8;
+            margin-bottom: 30px;
+        }
+
+        .table-container {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 12px;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #334155;
+        }
+
+        th {
+            color: #94a3b8;
+            font-size: 13px;
+            text-transform: uppercase;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .prioridade,
+        .status {
+            display: inline-block;
+            padding: 5px 9px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .prioridade {
+            background: #312e81;
+            color: #c7d2fe;
+        }
+
+        .status {
+            background: #064e3b;
+            color: #a7f3d0;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 50px 20px;
+            color: #94a3b8;
+        }
+
+        .btn {
+            display: inline-block;
+            margin-top: 20px;
+            background: #6366f1;
+            color: white;
+            text-decoration: none;
+            padding: 11px 18px;
+            border-radius: 7px;
+        }
+
+        .btn:hover {
+            background: #4f46e5;
+        }
+
+        @media (max-width: 700px) {
+
+            main {
+                margin: 20px auto;
+            }
+
+            th,
+            td {
+                padding: 12px 10px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <a href="{% url 'home' %}">
+            ← Voltar para Home
+        </a>
+    </header>
+
+    <main>
+
+        <h1>Meus Chamados</h1>
+
+        <p class="subtitle">
+            Consulte os chamados registrados por você.
+        </p>
+
+        {% if chamados %}
+
+            <div class="table-container">
+
+                <table>
+
+                    <thead>
+                        <tr>
+                            <th>Número do Chamado</th>
+                            <th>Tipo</th>
+                            <th>Setor</th>
+                            <th>Prioridade</th>
+                            <th>Status</th>
+                            <th>Data de Abertura</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        {% for chamado in chamados %}
+
+                            <tr>
+
+                                <td>
+                                    #{{ chamado.id }}
+                                </td>
+
+                                <td>
+                                    {{ chamado.tipo }}
+                                </td>
+
+                                <td>
+                                    {{ chamado.setor }}
+                                </td>
+
+                                <td>
+                                    <span class="prioridade">
+                                        {{ chamado.get_prioridade_display }}
+                                    </span>
+                                </td>
+
+                                <td>
+                                    <span class="status">
+                                        {{ chamado.get_status_display }}
+                                    </span>
+                                </td>
+
+                                <td>
+                                    {{ chamado.data_abertura|date:"d/m/Y H:i" }}
+                                </td>
+
+                            </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        {% else %}
+
+            <div class="table-container">
+
+                <div class="empty">
+
+                    <p>
+                        Você ainda não possui chamados.
+                    </p>
+
+                    <a
+                        href="{% url 'abrir_chamado' %}"
+                        class="btn"
+                    >
+                        Abrir primeiro chamado
+                    </a>
+
+                </div>
+
+            </div>
+
+        {% endif %}
+
+    </main>
+
+</body>
+
+</html>
