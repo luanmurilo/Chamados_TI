@@ -24,17 +24,11 @@ class Chamado(models.Model):
         related_name='chamados'
     )
 
-    setor = models.CharField(
-        max_length=100
-    )
+    setor = models.CharField(max_length=100)
 
-    comentario = models.TextField(
-        blank=True
-    )
+    comentario = models.TextField(blank=True)
 
-    tipo = models.CharField(
-        max_length=100
-    )
+    tipo = models.CharField(max_length=100)
 
     prioridade = models.CharField(
         max_length=10,
@@ -55,13 +49,9 @@ class Chamado(models.Model):
         blank=True
     )
 
-    data_abertura = models.DateTimeField(
-        auto_now_add=True
-    )
+    data_abertura = models.DateTimeField(auto_now_add=True)
 
-    data_atualizacao = models.DateTimeField(
-        auto_now=True
-    )
+    data_atualizacao = models.DateTimeField(auto_now=True)
 
     data_conclusao = models.DateTimeField(
         null=True,
@@ -71,3 +61,25 @@ class Chamado(models.Model):
     def __str__(self):
         return f'Chamado #{self.id} - {self.solicitante.username}'
 
+
+class ComentarioChamado(models.Model):
+
+    chamado = models.ForeignKey(
+        Chamado,
+        on_delete=models.CASCADE,
+        related_name='comentarios'
+    )
+
+    usuario = models.ForeignKey(
+        User,
+        on_delete=models.PROTECT
+    )
+
+    mensagem = models.TextField()
+
+    data_criacao = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    def __str__(self):
+        return f'Comentário #{self.id} - Chamado #{self.chamado.id}'

@@ -1,5 +1,5 @@
 from django import forms
-from .models import Chamado
+from .models import Chamado, ComentarioChamado
 
 
 class ChamadoForm(forms.ModelForm):
@@ -52,20 +52,31 @@ class ChamadoForm(forms.ModelForm):
             'setor',
             'tipo',
             'prioridade',
-            'comentario',
             'descricao',
         ]
 
         widgets = {
             'prioridade': forms.Select(),
 
-            'comentario': forms.Textarea(attrs={
-                'placeholder': 'Adicione um comentário, se necessário',
-                'rows': 3
-            }),
-
             'descricao': forms.Textarea(attrs={
                 'placeholder': 'Descreva detalhadamente o problema',
                 'rows': 6
+            }),
+        }
+
+
+class ComentarioForm(forms.ModelForm):
+
+    class Meta:
+        model = ComentarioChamado
+
+        fields = [
+            'mensagem',
+        ]
+
+        widgets = {
+            'mensagem': forms.Textarea(attrs={
+                'placeholder': 'Digite sua mensagem...',
+                'rows': 4,
             }),
         }

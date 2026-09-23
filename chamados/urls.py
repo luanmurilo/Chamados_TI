@@ -16,4 +16,10 @@ urlpatterns = [
         views.meus_chamados,
         name='meus_chamados'
     ),
+
+    path(
+        'chamados/<int:id>/',
+        views.detalhe_chamado,
+        name='detalhe_chamado'
+    ),
 ]

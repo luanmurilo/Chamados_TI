@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Detalhes do Chamado #{{ chamado.id }}</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #0f172a;
+            color: #e2e8f0;
+            min-height: 100vh;
+        }
+
+        header {
+            background: #1e293b;
+            padding: 20px 30px;
+            border-bottom: 1px solid #334155;
+        }
+
+        header a {
+            color: #94a3b8;
+            text-decoration: none;
+        }
+
+        main {
+            max-width: 850px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .container {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .title {
+            padding: 25px;
+            border-bottom: 1px solid #334155;
+        }
+
+        .title h1 {
+            margin-bottom: 8px;
+        }
+
+        .title p {
+            color: #94a3b8;
+        }
+
+        .details {
+            padding: 25px;
+        }
+
+        .row {
+            display: grid;
+            grid-template-columns: 200px 1fr;
+            gap: 20px;
+
+            padding: 16px 0;
+
+            border-bottom: 1px solid #334155;
+        }
+
+        .row:last-child {
+            border-bottom: none;
+        }
+
+        .label {
+            color: #94a3b8;
+            font-weight: bold;
+        }
+
+        .value {
+            color: #f8fafc;
+            word-break: break-word;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 6px 10px;
+            border-radius: 6px;
+
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .priority {
+            background: #312e81;
+            color: #c7d2fe;
+        }
+
+        .status {
+            background: #064e3b;
+            color: #a7f3d0;
+        }
+
+        .description {
+            white-space: pre-wrap;
+        }
+
+        .actions {
+            padding: 20px 25px;
+            border-top: 1px solid #334155;
+        }
+
+        .btn {
+            display: inline-block;
+
+            background: #6366f1;
+            color: white;
+
+            text-decoration: none;
+
+            padding: 10px 16px;
+
+            border-radius: 7px;
+        }
+
+        .btn:hover {
+            background: #4f46e5;
+        }
+
+        @media (max-width: 600px) {
+
+            main {
+                margin: 20px auto;
+            }
+
+            .details {
+                padding: 20px;
+            }
+
+            .row {
+                grid-template-columns: 1fr;
+                gap: 6px;
+            }
+
+            .title {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+
+        <a href="{% url 'meus_chamados' %}">
+            ← Voltar para Meus Chamados
+        </a>
+
+    </header>
+
+    <main>
+
+        <div class="container">
+
+            <div class="title">
+
+                <h1>
+                    Número do Chamado #{{ chamado.id }}
+                </h1>
+
+                <p>
+                    Detalhes da solicitação
+                </p>
+
+            </div>
+
+            <div class="details">
+
+                <div class="row">
+
+                    <div class="label">
+                        Número do Chamado
+                    </div>
+
+                    <div class="value">
+                        #{{ chamado.id }}
+                    </div>
+
+                </div>
+
+                <div class="row">
+
+                    <div class="label">
+                        Solicitante
+                    </div>
+
+                    <div class="value">
+                        {{ chamado.solicitante.get_full_name|default:chamado.solicitante.username }}
+                    </div>
+
+                </div>
+
+                <div class="row">
+
+                    <div class="label">
+                        Setor
+                    </div>
+
+                    <div class="value">
+                        {{ chamado.setor }}
+                    </div>
+
+                </div>
+
+                <div class="row">
+
+                    <div class="label">
+                        Tipo
+                    </div>
+
+                    <div class="value">
+                        {{ chamado.tipo }}
+                    </div>
+
+                </div>
+
+                <div class="row">
+
+                    <div class="label">
+                        Prioridade
+                    </div>
+
+                    <div class="value">
+
+                        <span class="badge priority">
+                            {{ chamado.get_prioridade_display }}
+                        </span>
+
+                    </div>
+
+                </div>
+
+                <div class="row">
+
+                    <div class="label">
+                        Status
+                    </div>
+
+                    <div class="value">
+
+                        <span class="badge status">
+                            {{ chamado.get_status_display }}
+                        </span>
+
+                    </div>
+
+                </div>
+
+                <div class="row">
+
+                    <div class="label">
+                        Data de Conclusão
+                    </div>
+
+                        <div class="value">
+
+                            {% if chamado.data_conclusao %}
+                                {{ chamado.data_conclusao|date:"d/m/Y H:i" }}
+                            {% else %}
+                                Ainda não concluído
+                            {% endif %}
+
+                        </div>
+                </div>
+                <div class="row">
+
+                    <div class="label">
+                        Responsável
+                    </div>
+
+                    <div class="value">
+                        {{ chamado.responsavel|default:"Ainda não atribuído" }}
+                    </div>
+
+                </div>
+                <div class="row">
+
+                    <div class="label">
+                        Data de Abertura
+                    </div>
+
+                    <div class="value">
+                        {{ chamado.data_abertura|date:"d/m/Y H:i" }}
+                    </div>
+
+                </div>
+
+                <div class="row">
+
+                    <div class="label">
+                        Descrição
+                    </div>
+
+                    <div class="value description">
+                        {{ chamado.descricao }}
+                    </div>
+
+                </div>
+                <div class="info-item">
+                    <span class="label">Histórico de atendimento</span>
+
+                    <div class="comentarios">
+
+                        {% for comentario in comentarios %}
+
+                            <div class="comentario">
+
+                                <div class="comentario-header">
+                                    <strong>
+                                        {{ comentario.usuario.get_full_name|default:comentario.usuario.username }}
+                                    </strong>
+
+                                    <span>
+                                        {{ comentario.data_criacao|date:"d/m/Y H:i" }}
+                                    </span>
+                                </div>
+
+                                <div class="comentario-mensagem">
+                                    {{ comentario.mensagem|linebreaksbr }}
+                                </div>
+
+                            </div>
+
+                        {% empty %}
+
+                            <p>Nenhum comentário registrado.</p>
+
+                        {% endfor %}
+
+                    </div>
+                </div>
+
+
+
+
+                    <div class="info-item">
+
+                        <span class="label">Adicionar comentário</span>
+
+                        <form method="post">
+
+                            {% csrf_token %}
+
+                            {{ form.mensagem }}
+
+                            <button type="submit">
+                                Enviar comentário
+                            </button>
+
+                        </form>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="actions">
+
+                <a
+                    href="{% url 'meus_chamados' %}"
+                    class="btn"
+                >
+                    Voltar para Meus Chamados
+                </a>
+
+            </div>
+
+        </div>
+
+    </main>
+
+</body>
+
+</html>
