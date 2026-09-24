@@ -7,9 +7,30 @@ from .forms import (
     StatusChamadoForm,
     ResponsavelChamadoForm
 )
+from django.contrib.auth.models import User
+from django.db.models import Q
+from django.contrib.auth.views import LoginView
 
 def usuario_eh_ti(user):
     return user.groups.filter(name='TI').exists()
+
+def redirecionar_apos_login(request):
+
+    if usuario_eh_ti(request.user):
+        return redirect('central_ti')
+
+    return redirect('home')
+
+class LoginUsuarioView(LoginView):
+
+    template_name = 'registration/login.html'
+
+    def get_success_url(self):
+
+        if usuario_eh_ti(self.request.user):
+            return '/central-ti/'
+
+        return '/'
 
 @login_required
 def home(request):
@@ -27,6 +48,9 @@ def abrir_chamado(request):
             chamado.solicitante = request.user
             chamado.save()
 
+            if usuario_eh_ti(request.user):
+                return redirect('central_ti')
+
             return redirect('home')
 
     else:
@@ -35,7 +59,10 @@ def abrir_chamado(request):
     return render(
         request,
         'chamados/abrir_chamado.html',
-        {'form': form}
+        {
+            'form': form,
+            'is_ti': usuario_eh_ti(request.user),
+        }
     )
 
 
@@ -195,7 +222,102 @@ def central_ti(request):
         'responsavel'
     ).order_by(
         '-data_abertura'
-    )[:10]
+    )
+
+    # =========================
+    # FILTRO POR STATUS
+    # =========================
+
+    status_filtro = request.GET.get('status')
+
+    if status_filtro:
+        chamados_recentes = chamados_recentes.filter(
+            status=status_filtro
+        )
+
+    # =========================
+    # FILTRO POR PRIORIDADE
+    # =========================
+
+    prioridade_filtro = request.GET.get('prioridade')
+
+    if prioridade_filtro:
+        chamados_recentes = chamados_recentes.filter(
+            prioridade=prioridade_filtro
+        )
+
+    # =========================
+    # FILTRO POR TIPO
+    # =========================
+
+    tipo_filtro = request.GET.get('tipo')
+
+    if tipo_filtro:
+        chamados_recentes = chamados_recentes.filter(
+            tipo=tipo_filtro
+        )
+
+    # =========================
+    # FILTRO POR SETOR
+    # =========================
+
+    setor_filtro = request.GET.get('setor')
+
+    if setor_filtro:
+        chamados_recentes = chamados_recentes.filter(
+            setor=setor_filtro
+        )
+
+    # =========================
+    # FILTRO POR RESPONSÁVEL
+    # =========================
+
+    responsavel_filtro = request.GET.get('responsavel')
+
+    if responsavel_filtro:
+        chamados_recentes = chamados_recentes.filter(
+            responsavel_id=responsavel_filtro
+        )
+
+    # Limita aos 10 mais recentes
+    # somente depois dos filtros
+
+    # =========================
+    # BUSCA
+    # =========================
+
+    busca = request.GET.get('busca', '').strip()
+
+    if busca:
+        filtros_busca = Q(
+            descricao__icontains=busca
+        ) | Q(
+            solicitante__username__icontains=busca
+        ) | Q(
+            solicitante__first_name__icontains=busca
+        ) | Q(
+            solicitante__last_name__icontains=busca
+        ) | Q(
+            tipo__icontains=busca
+        )
+
+        if busca.isdigit():
+            filtros_busca |= Q(
+                id=int(busca)
+            )
+
+        chamados_recentes = chamados_recentes.filter(
+            filtros_busca
+        )
+
+    chamados_recentes = chamados_recentes[:10]
+
+    responsaveis_ti = User.objects.filter(
+        groups__name='TI'
+    ).order_by(
+        'first_name',
+        'username'
+    )
 
     return render(
         request,
@@ -206,5 +328,11 @@ def central_ti(request):
             'total_concluidos': total_concluidos,
             'total_urgentes': total_urgentes,
             'chamados_recentes': chamados_recentes,
+            'setor_filtro': setor_filtro,
+            'status_filtro': status_filtro,
+            'prioridade_filtro': prioridade_filtro,
+            'tipo_filtro': tipo_filtro,
+            'responsavel_filtro': responsavel_filtro,
+            'busca': busca,
         }
     )

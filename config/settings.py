@@ -128,7 +128,16 @@ STATIC_URL = 'static/'
 
 MAILERS = {
     'default': {
-        'BACKEND': 'django.core.mail.backends.console.EmailBackend',
+        'BACKEND': 'django.core.mail.backends.smtp.EmailBackend',
+        'OPTIONS': {
+            'host': '',
+            'port': 587,
+            'username': '',
+            'password': '',
+            'use_tls': True,
+            'use_ssl': False,
+            'timeout': None,
+        },
     },
 }
 

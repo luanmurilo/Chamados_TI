@@ -134,6 +134,7 @@
         .btn:hover {
             background: #4f46e5;
         }
+
         .responsavel-form {
             display: flex;
             gap: 10px;
@@ -162,6 +163,7 @@
         .responsavel-form button:hover {
             background: #4f46e5;
         }
+
         .status-form {
             display: flex;
             gap: 10px;
@@ -190,6 +192,7 @@
         .status-form button:hover {
             background: #4f46e5;
         }
+
         .historico {
             margin-top: 25px;
             padding-top: 25px;
@@ -246,6 +249,7 @@
             font-size: 14px;
             padding: 15px 0;
         }
+
         .adicionar-comentario {
             margin-top: 25px;
             padding-top: 25px;
@@ -312,14 +316,17 @@
         }
 
         @media (max-width: 600px) {
+
             .comentario-form button {
                 width: 100%;
             }
+
             .comentario-header {
                 flex-direction: column;
                 align-items: flex-start;
                 gap: 5px;
             }
+
             .status-form {
                 flex-direction: column;
                 align-items: stretch;
@@ -329,6 +336,7 @@
             .status-form button {
                 width: 100%;
             }
+
             .responsavel-form {
                 flex-direction: column;
                 align-items: stretch;
@@ -356,16 +364,28 @@
                 padding: 20px;
             }
         }
+
     </style>
+
 </head>
 
 <body>
 
     <header>
 
-        <a href="{% url 'meus_chamados' %}">
-            ← Voltar para Meus Chamados
-        </a>
+        {% if is_ti %}
+
+            <a href="{% url 'central_ti' %}">
+                ← Voltar para Central de TI
+            </a>
+
+        {% else %}
+
+            <a href="{% url 'meus_chamados' %}">
+                ← Voltar para Meus Chamados
+            </a>
+
+        {% endif %}
 
     </header>
 
@@ -491,16 +511,22 @@
                         Data de Conclusão
                     </div>
 
-                        <div class="value">
+                    <div class="value">
 
-                            {% if chamado.data_conclusao %}
-                                {{ chamado.data_conclusao|date:"d/m/Y H:i" }}
-                            {% else %}
-                                Ainda não concluído
-                            {% endif %}
+                        {% if chamado.data_conclusao %}
 
-                        </div>
+                            {{ chamado.data_conclusao|date:"d/m/Y H:i" }}
+
+                        {% else %}
+
+                            Ainda não concluído
+
+                        {% endif %}
+
+                    </div>
+
                 </div>
+
                 <div class="row">
 
                     <div class="label">
@@ -540,6 +566,7 @@
                     </div>
 
                 </div>
+
                 <div class="row">
 
                     <div class="label">
@@ -563,6 +590,7 @@
                     </div>
 
                 </div>
+
                 <div class="historico">
 
                     <div class="historico-titulo">
@@ -604,6 +632,7 @@
                     </div>
 
                 </div>
+
                 <div class="adicionar-comentario">
 
                     <div class="comentario-titulo">
@@ -624,18 +653,29 @@
 
                 </div>
 
-                </div>
-
             </div>
 
             <div class="actions">
 
-                <a
-                    href="{% url 'meus_chamados' %}"
-                    class="btn"
-                >
-                    Voltar para Meus Chamados
-                </a>
+                {% if is_ti %}
+
+                    <a
+                        href="{% url 'central_ti' %}"
+                        class="btn"
+                    >
+                        Voltar para Central de TI
+                    </a>
+
+                {% else %}
+
+                    <a
+                        href="{% url 'meus_chamados' %}"
+                        class="btn"
+                    >
+                        Voltar para Meus Chamados
+                    </a>
+
+                {% endif %}
 
             </div>
 

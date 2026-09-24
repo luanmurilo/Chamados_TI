@@ -1,1 +1,1066 @@
-<!DOCTYPE html> <html lang="pt-BR"> <head> <meta charset="UTF-8"> <meta name="viewport" content="width=device-width, initial-scale=1.0" > <title>Central de TI</title> <style> * { box-sizing: border-box; margin: 0; padding: 0; } body { font-family: Arial, sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; } header { background: #1e293b; padding: 20px 30px; border-bottom: 1px solid #334155; } header h1 { margin-bottom: 5px; } header p { color: #94a3b8; } main { max-width: 1250px; margin: 40px auto; padding: 0 20px; } /* ========================= CARDS ========================= */ .cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; } .card { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 25px; } .card-title { color: #94a3b8; font-size: 14px; margin-bottom: 12px; } .card-number { font-size: 32px; font-weight: bold; } .abertos { color: #f59e0b; } .atendimento { color: #60a5fa; } .concluidos { color: #34d399; } .urgentes { color: #f87171; } /* ========================= CHAMADOS RECENTES ========================= */ .recentes { margin-top: 30px; width: 100%; background: #1e293b; border: 1px solid #334155; border-radius: 12px; overflow: hidden; } .recentes-header { padding: 22px 25px; border-bottom: 1px solid #334155; } .recentes-header h2 { font-size: 18px; margin: 0; } .tabela-container { width: 100%; overflow-x: auto; } .tabela { width: 100%; min-width: 850px; border-collapse: collapse; } .tabela th { text-align: left; padding: 15px 20px; color: #94a3b8; font-size: 12px; text-transform: uppercase; border-bottom: 1px solid #334155; } .tabela td { padding: 17px 20px; border-bottom: 1px solid #334155; font-size: 14px; } .tabela tr:last-child td { border-bottom: none; } .tabela tr:hover { background: #172033; } /* ========================= LINK DO CHAMADO ========================= */ .chamado-link { color: #a5b4fc; text-decoration: none; font-weight: bold; } .chamado-link:hover { color: #c7d2fe; } /* ========================= STATUS ========================= */ .badge { display: inline-block; padding: 5px 9px; border-radius: 6px; font-size: 12px; font-weight: bold; } .status-aberto { background: #78350f; color: #fde68a; } .status-atendimento { background: #1e3a8a; color: #bfdbfe; } .status-concluido { background: #064e3b; color: #a7f3d0; } .status-cancelado { background: #450a0a; color: #fecaca; } /* ========================= PRIORIDADE ========================= */ .prioridade-urgente { color: #f87171; font-weight: bold; } .prioridade-alta { color: #fb923c; font-weight: bold; } .prioridade-media { color: #facc15; } .prioridade-baixa { color: #94a3b8; } /* ========================= SEM CHAMADOS ========================= */ .sem-chamados { padding: 30px; text-align: center; color: #64748b; } /* ========================= RESPONSIVIDADE ========================= */ @media (max-width: 900px) { .cards { grid-template-columns: repeat(2, 1fr); } } @media (max-width: 500px) { main { margin: 20px auto; padding: 0 15px; } header { padding: 20px; } .cards { grid-template-columns: 1fr; } .card { padding: 20px; } .recentes-header { padding: 20px; } } </style> </head> <body> <header> <h1> Central de TI </h1> <p> Olá, {{ request.user.get_full_name|default:request.user.username }} </p> </header> <main> <!-- ========================= CARDS ========================= --> <div class="cards"> <div class="card"> <div class="card-title"> Chamados Abertos </div> <div class="card-number abertos"> {{ total_abertos }} </div> </div> <div class="card"> <div class="card-title"> Em Atendimento </div> <div class="card-number atendimento"> {{ total_em_atendimento }} </div> </div> <div class="card"> <div class="card-title"> Concluídos </div> <div class="card-number concluidos"> {{ total_concluidos }} </div> </div> <div class="card"> <div class="card-title"> Urgentes </div> <div class="card-number urgentes"> {{ total_urgentes }} </div> </div> </div> <!-- ========================= CHAMADOS RECENTES ========================= --> <div class="recentes"> <div class="recentes-header"> <h2> Chamados recentes </h2> </div> {% if chamados_recentes %} <div class="tabela-container"> <table class="tabela"> <thead> <tr> <th> Chamado </th> <th> Solicitante </th> <th> Tipo </th> <th> Prioridade </th> <th> Status </th> <th> Abertura </th> </tr> </thead> <tbody> {% for chamado in chamados_recentes %} <tr> <td> <a href="{% url 'detalhe_chamado' chamado.id %}" class="chamado-link" > #{{ chamado.id }} </a> </td> <td> {{ chamado.solicitante.get_full_name|default:chamado.solicitante.username }} </td> <td> {{ chamado.get_tipo_display|default:chamado.tipo }} </td> <td> <span class="prioridade-{{ chamado.prioridade|lower }}"> {{ chamado.get_prioridade_display }} </span> </td> <td> {% if chamado.status == 'ABERTO' %} <span class="badge status-aberto"> {{ chamado.get_status_display }} </span> {% elif chamado.status == 'EM_ATENDIMENTO' %} <span class="badge status-atendimento"> {{ chamado.get_status_display }} </span> {% elif chamado.status == 'CONCLUIDO' %} <span class="badge status-concluido"> {{ chamado.get_status_display }} </span> {% else %} <span class="badge status-cancelado"> {{ chamado.get_status_display }} </span> {% endif %} </td> <td> {{ chamado.data_abertura|date:"d/m/Y H:i" }} </td> </tr> {% endfor %} </tbody> </table> </div> {% else %} <div class="sem-chamados"> Nenhum chamado registrado. </div> {% endif %} </div> </main> </body> </html>
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Central de TI</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #0f172a;
+            color: #e2e8f0;
+            min-height: 100vh;
+        }
+
+        header {
+            background: #1e293b;
+            padding: 20px 30px;
+            border-bottom: 1px solid #334155;
+
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .header-info {
+            min-width: 0;
+        }
+
+        header h1 {
+            margin-bottom: 5px;
+        }
+
+        header p {
+            color: #94a3b8;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+
+        .btn-header {
+            display: inline-block;
+            padding: 9px 14px;
+            border-radius: 7px;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            border: 1px solid transparent;
+            white-space: nowrap;
+        }
+
+        .btn-abrir {
+            background: #6366f1;
+            color: white;
+        }
+
+        .btn-abrir:hover {
+            background: #4f46e5;
+        }
+
+        .btn-sair {
+            background: #334155;
+            color: #e2e8f0;
+            border-color: #475569;
+        }
+
+        .btn-sair:hover {
+            background: #475569;
+            color: white;
+        }
+
+        .logout-form {
+            margin: 0;
+        }
+
+        main {
+            max-width: 1400px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+        }
+
+        .card {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 12px;
+            padding: 25px;
+        }
+
+        .card-title {
+            color: #94a3b8;
+            font-size: 14px;
+            margin-bottom: 12px;
+        }
+
+        .card-number {
+            font-size: 32px;
+            font-weight: bold;
+        }
+
+        .abertos {
+            color: #f59e0b;
+        }
+
+        .atendimento {
+            color: #60a5fa;
+        }
+
+        .concluidos {
+            color: #34d399;
+        }
+
+        .urgentes {
+            color: #f87171;
+        }
+
+        .recentes {
+            margin-top: 30px;
+            width: 100%;
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .recentes-header {
+            padding: 22px 25px;
+            border-bottom: 1px solid #334155;
+        }
+
+        .recentes-header h2 {
+            font-size: 18px;
+            margin: 0;
+        }
+
+        .filtro-form {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .filtro-form label {
+            color: #94a3b8;
+            font-size: 14px;
+        }
+
+        .filtro-form select {
+            background: #0f172a;
+            color: #e2e8f0;
+            border: 1px solid #475569;
+            border-radius: 7px;
+            padding: 9px 12px;
+            font-size: 14px;
+            min-width: 140px;
+        }
+
+        .campo-busca {
+            flex: 1;
+            min-width: 220px;
+            background: #0f172a;
+            color: #e2e8f0;
+            border: 1px solid #475569;
+            border-radius: 7px;
+            padding: 9px 12px;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .campo-busca::placeholder {
+            color: #64748b;
+        }
+
+        .campo-busca:focus {
+            border-color: #6366f1;
+        }
+
+        .filtro-form button {
+            background: #6366f1;
+            color: white;
+            border: none;
+            border-radius: 7px;
+            padding: 9px 14px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .filtro-form button:hover {
+            background: #4f46e5;
+        }
+
+        .btn-limpar {
+            background: #475569 !important;
+        }
+
+        .btn-limpar:hover {
+            background: #64748b !important;
+        }
+
+        .tabela-container {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        .tabela {
+            width: 100%;
+            min-width: 1150px;
+            border-collapse: collapse;
+        }
+
+        .tabela th {
+            text-align: left;
+            padding: 15px 20px;
+            color: #94a3b8;
+            font-size: 12px;
+            text-transform: uppercase;
+            border-bottom: 1px solid #334155;
+        }
+
+        .tabela td {
+            padding: 17px 20px;
+            border-bottom: 1px solid #334155;
+            font-size: 14px;
+        }
+
+        .tabela tr:last-child td {
+            border-bottom: none;
+        }
+
+        .tabela tr:hover {
+            background: #172033;
+        }
+
+        .chamado-link {
+            color: #a5b4fc;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .chamado-link:hover {
+            color: #c7d2fe;
+        }
+
+        .btn-detalhes {
+            display: inline-block;
+            background: #334155;
+            color: #e2e8f0;
+            text-decoration: none;
+            border: 1px solid #475569;
+            border-radius: 6px;
+            padding: 7px 11px;
+            font-size: 12px;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+
+        .btn-detalhes:hover {
+            background: #475569;
+            color: white;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 5px 9px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .status-aberto {
+            background: #78350f;
+            color: #fde68a;
+        }
+
+        .status-atendimento {
+            background: #1e3a8a;
+            color: #bfdbfe;
+        }
+
+        .status-concluido {
+            background: #064e3b;
+            color: #a7f3d0;
+        }
+
+        .status-cancelado {
+            background: #450a0a;
+            color: #fecaca;
+        }
+
+        .prioridade-urgente {
+            color: #f87171;
+            font-weight: bold;
+        }
+
+        .prioridade-alta {
+            color: #fb923c;
+            font-weight: bold;
+        }
+
+        .prioridade-media {
+            color: #facc15;
+        }
+
+        .prioridade-baixa {
+            color: #94a3b8;
+        }
+
+        .responsavel-nao-atribuido {
+            color: #64748b;
+            font-style: italic;
+        }
+
+        .sem-chamados {
+            padding: 30px;
+            text-align: center;
+            color: #64748b;
+        }
+
+        @media (max-width: 900px) {
+
+            .cards {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+        }
+
+        @media (max-width: 600px) {
+
+            main {
+                margin: 20px auto;
+                padding: 0 15px;
+            }
+
+            header {
+                padding: 20px;
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .header-actions {
+                width: 100%;
+            }
+
+            .btn-header {
+                flex: 1;
+                text-align: center;
+            }
+
+            .cards {
+                grid-template-columns: 1fr;
+            }
+
+            .card {
+                padding: 20px;
+            }
+
+            .recentes-header {
+                padding: 20px;
+            }
+
+            .filtro-form {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .filtro-form label {
+                margin-top: 5px;
+            }
+
+            .filtro-form select,
+            .filtro-form button,
+            .campo-busca {
+                width: 100%;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <header>
+
+        <div class="header-info">
+
+            <h1>
+                Central de TI
+            </h1>
+
+            <p>
+                Olá,
+                {{ request.user.get_full_name|default:request.user.username }}
+            </p>
+
+        </div>
+
+        <div class="header-actions">
+
+            <a
+                href="{% url 'abrir_chamado' %}"
+                class="btn-header btn-abrir"
+            >
+                + Abrir chamado
+            </a>
+
+            <form
+                method="post"
+                action="{% url 'logout' %}"
+                class="logout-form"
+            >
+
+                {% csrf_token %}
+
+                <button
+                    type="submit"
+                    class="btn-header btn-sair"
+                >
+                    Sair
+                </button>
+
+            </form>
+
+        </div>
+
+    </header>
+
+    <main>
+
+        <div class="cards">
+
+            <div class="card">
+
+                <div class="card-title">
+                    Chamados Abertos
+                </div>
+
+                <div class="card-number abertos">
+                    {{ total_abertos }}
+                </div>
+
+            </div>
+
+            <div class="card">
+
+                <div class="card-title">
+                    Em Atendimento
+                </div>
+
+                <div class="card-number atendimento">
+                    {{ total_em_atendimento }}
+                </div>
+
+            </div>
+
+            <div class="card">
+
+                <div class="card-title">
+                    Concluídos
+                </div>
+
+                <div class="card-number concluidos">
+                    {{ total_concluidos }}
+                </div>
+
+            </div>
+
+            <div class="card">
+
+                <div class="card-title">
+                    Urgentes
+                </div>
+
+                <div class="card-number urgentes">
+                    {{ total_urgentes }}
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="recentes">
+
+            <div class="recentes-header">
+
+                <h2>
+                    Chamados recentes
+                </h2>
+
+                <form
+                    method="get"
+                    class="filtro-form"
+                >
+
+                    <input
+                        type="text"
+                        name="busca"
+                        class="campo-busca"
+                        placeholder="Buscar chamado, solicitante ou descrição..."
+                        value="{{ busca }}"
+                    >
+
+                    <label for="status">
+                        Status:
+                    </label>
+
+                    <select
+                        name="status"
+                        id="status"
+                    >
+
+                        <option value="">
+                            Todos
+                        </option>
+
+                        <option
+                            value="ABERTO"
+                            {% if status_filtro == 'ABERTO' %}selected{% endif %}
+                        >
+                            Aberto
+                        </option>
+
+                        <option
+                            value="EM_ATENDIMENTO"
+                            {% if status_filtro == 'EM_ATENDIMENTO' %}selected{% endif %}
+                        >
+                            Em atendimento
+                        </option>
+
+                        <option
+                            value="CONCLUIDO"
+                            {% if status_filtro == 'CONCLUIDO' %}selected{% endif %}
+                        >
+                            Concluído
+                        </option>
+
+                        <option
+                            value="CANCELADO"
+                            {% if status_filtro == 'CANCELADO' %}selected{% endif %}
+                        >
+                            Cancelado
+                        </option>
+
+                    </select>
+
+                    <label for="prioridade">
+                        Prioridade:
+                    </label>
+
+                    <select
+                        name="prioridade"
+                        id="prioridade"
+                    >
+
+                        <option value="">
+                            Todas
+                        </option>
+
+                        <option
+                            value="URGENTE"
+                            {% if prioridade_filtro == 'URGENTE' %}selected{% endif %}
+                        >
+                            Urgente
+                        </option>
+
+                        <option
+                            value="ALTA"
+                            {% if prioridade_filtro == 'ALTA' %}selected{% endif %}
+                        >
+                            Alta
+                        </option>
+
+                        <option
+                            value="MEDIA"
+                            {% if prioridade_filtro == 'MEDIA' %}selected{% endif %}
+                        >
+                            Média
+                        </option>
+
+                        <option
+                            value="BAIXA"
+                            {% if prioridade_filtro == 'BAIXA' %}selected{% endif %}
+                        >
+                            Baixa
+                        </option>
+
+                    </select>
+
+                    <label for="tipo">
+                        Tipo:
+                    </label>
+
+                    <select
+                        name="tipo"
+                        id="tipo"
+                    >
+
+                        <option value="">
+                            Todos
+                        </option>
+
+                        <option
+                            value="OFFICE"
+                            {% if tipo_filtro == 'OFFICE' %}selected{% endif %}
+                        >
+                            Office
+                        </option>
+
+                        <option
+                            value="IMPRESSORA"
+                            {% if tipo_filtro == 'IMPRESSORA' %}selected{% endif %}
+                        >
+                            Impressora
+                        </option>
+
+                        <option
+                            value="MUDANCA"
+                            {% if tipo_filtro == 'MUDANCA' %}selected{% endif %}
+                        >
+                            Mudança
+                        </option>
+
+                        <option
+                            value="PC"
+                            {% if tipo_filtro == 'PC' %}selected{% endif %}
+                        >
+                            PC
+                        </option>
+
+                        <option
+                            value="SOFTWARE"
+                            {% if tipo_filtro == 'SOFTWARE' %}selected{% endif %}
+                        >
+                            Software
+                        </option>
+
+                        <option
+                            value="DRIVE"
+                            {% if tipo_filtro == 'DRIVE' %}selected{% endif %}
+                        >
+                            Drive
+                        </option>
+
+                        <option
+                            value="EMAIL"
+                            {% if tipo_filtro == 'EMAIL' %}selected{% endif %}
+                        >
+                            E-mail
+                        </option>
+
+                        <option
+                            value="PERIFERICOS"
+                            {% if tipo_filtro == 'PERIFERICOS' %}selected{% endif %}
+                        >
+                            Periféricos
+                        </option>
+
+                        <option
+                            value="OUTROS"
+                            {% if tipo_filtro == 'OUTROS' %}selected{% endif %}
+                        >
+                            Outros
+                        </option>
+
+                    </select>
+
+                    <label for="setor">
+                        Setor:
+                    </label>
+
+                    <select
+                        name="setor"
+                        id="setor"
+                    >
+
+                        <option value="">
+                            Todos
+                        </option>
+
+                        <option
+                            value="TI"
+                            {% if setor_filtro == 'TI' %}selected{% endif %}
+                        >
+                            TI
+                        </option>
+
+                        <option
+                            value="RH"
+                            {% if setor_filtro == 'RH' %}selected{% endif %}
+                        >
+                            RH
+                        </option>
+
+                        <option
+                            value="ENG_APLICADA"
+                            {% if setor_filtro == 'ENG_APLICADA' %}selected{% endif %}
+                        >
+                            ENG APLICADA
+                        </option>
+
+                        <option
+                            value="LOGISTICA"
+                            {% if setor_filtro == 'LOGISTICA' %}selected{% endif %}
+                        >
+                            LOGÍSTICA
+                        </option>
+
+                        <option
+                            value="MARKETING"
+                            {% if setor_filtro == 'MARKETING' %}selected{% endif %}
+                        >
+                            MARKETING
+                        </option>
+
+                        <option
+                            value="FINANCEIRO"
+                            {% if setor_filtro == 'FINANCEIRO' %}selected{% endif %}
+                        >
+                            FINANCEIRO
+                        </option>
+
+                        <option
+                            value="JURIDICO"
+                            {% if setor_filtro == 'JURIDICO' %}selected{% endif %}
+                        >
+                            JURÍDICO
+                        </option>
+
+                        <option
+                            value="DIRETORIA"
+                            {% if setor_filtro == 'DIRETORIA' %}selected{% endif %}
+                        >
+                            DIRETORIA
+                        </option>
+
+                        <option
+                            value="POS_OBRA"
+                            {% if setor_filtro == 'POS_OBRA' %}selected{% endif %}
+                        >
+                            PÓS OBRA
+                        </option>
+
+                        <option
+                            value="ALMOXARIFADO"
+                            {% if setor_filtro == 'ALMOXARIFADO' %}selected{% endif %}
+                        >
+                            ALMOXARIFADO
+                        </option>
+
+                        <option
+                            value="SHOWROOM"
+                            {% if setor_filtro == 'SHOWROOM' %}selected{% endif %}
+                        >
+                            SHOWROOM
+                        </option>
+
+                        <option
+                            value="SUPRIMENTOS"
+                            {% if setor_filtro == 'SUPRIMENTOS' %}selected{% endif %}
+                        >
+                            SUPRIMENTOS
+                        </option>
+
+                        <option
+                            value="PROJETOS"
+                            {% if setor_filtro == 'PROJETOS' %}selected{% endif %}
+                        >
+                            PROJETOS
+                        </option>
+
+                        <option
+                            value="ARQUITETURA"
+                            {% if setor_filtro == 'ARQUITETURA' %}selected{% endif %}
+                        >
+                            ARQUITETURA
+                        </option>
+
+                        <option
+                            value="QSM"
+                            {% if setor_filtro == 'QSM' %}selected{% endif %}
+                        >
+                            QSM
+                        </option>
+
+                        <option
+                            value="OUTROS"
+                            {% if setor_filtro == 'OUTROS' %}selected{% endif %}
+                        >
+                            OUTROS
+                        </option>
+
+                    </select>
+
+                    <label for="responsavel">
+                        Responsável:
+                    </label>
+
+                    <select
+                        name="responsavel"
+                        id="responsavel"
+                    >
+
+                        <option value="">
+                            Todos
+                        </option>
+
+                        {% for usuario in responsaveis_ti %}
+
+                            <option
+                                value="{{ usuario.id }}"
+                                {% if responsavel_filtro == usuario.id|stringformat:"s" %}selected{% endif %}
+                            >
+
+                                {% if usuario.get_full_name %}
+
+                                    {{ usuario.get_full_name }}
+
+                                {% else %}
+
+                                    {{ usuario.username }}
+
+                                {% endif %}
+
+                            </option>
+
+                        {% endfor %}
+
+                    </select>
+
+                    <button type="submit">
+                        Filtrar
+                    </button>
+
+                    <a
+                        href="{% url 'central_ti' %}"
+                        class="btn-detalhes btn-limpar"
+                    >
+                        Limpar filtros
+                    </a>
+
+                </form>
+
+            </div>
+
+            {% if chamados_recentes %}
+
+                <div class="tabela-container">
+
+                    <table class="tabela">
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    Chamado
+                                </th>
+
+                                <th>
+                                    Solicitante
+                                </th>
+
+                                <th>
+                                    Setor
+                                </th>
+
+                                <th>
+                                    Tipo
+                                </th>
+
+                                <th>
+                                    Prioridade
+                                </th>
+
+                                <th>
+                                    Responsável
+                                </th>
+
+                                <th>
+                                    Status
+                                </th>
+
+                                <th>
+                                    Abertura
+                                </th>
+
+                                <th>
+                                    Ações
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+                        <tbody>
+
+                            {% for chamado in chamados_recentes %}
+
+                                <tr>
+
+                                    <td>
+
+                                        <a
+                                            href="{% url 'detalhe_chamado' chamado.id %}"
+                                            class="chamado-link"
+                                        >
+                                            #{{ chamado.id }}
+                                        </a>
+
+                                    </td>
+
+                                    <td>
+
+                                        {{ chamado.solicitante.get_full_name|default:chamado.solicitante.username }}
+
+                                    </td>
+
+                                    <td>
+
+                                        {{ chamado.get_setor_display|default:chamado.setor }}
+
+                                    </td>
+
+                                    <td>
+
+                                        {{ chamado.get_tipo_display|default:chamado.tipo }}
+
+                                    </td>
+
+                                    <td>
+
+                                        <span
+                                            class="prioridade-{{ chamado.prioridade|lower }}"
+                                        >
+
+                                            {{ chamado.get_prioridade_display }}
+
+                                        </span>
+
+                                    </td>
+
+                                    <td>
+
+                                        {% if chamado.responsavel %}
+
+                                            {% if chamado.responsavel.get_full_name %}
+
+                                                {{ chamado.responsavel.get_full_name }}
+
+                                            {% else %}
+
+                                                {{ chamado.responsavel.username }}
+
+                                            {% endif %}
+
+                                        {% else %}
+
+                                            <span class="responsavel-nao-atribuido">
+                                                Não atribuído
+                                            </span>
+
+                                        {% endif %}
+
+                                    </td>
+
+                                    <td>
+
+                                        {% if chamado.status == 'ABERTO' %}
+
+                                            <span class="badge status-aberto">
+                                                {{ chamado.get_status_display }}
+                                            </span>
+
+                                        {% elif chamado.status == 'EM_ATENDIMENTO' %}
+
+                                            <span class="badge status-atendimento">
+                                                {{ chamado.get_status_display }}
+                                            </span>
+
+                                        {% elif chamado.status == 'CONCLUIDO' %}
+
+                                            <span class="badge status-concluido">
+                                                {{ chamado.get_status_display }}
+                                            </span>
+
+                                        {% else %}
+
+                                            <span class="badge status-cancelado">
+                                                {{ chamado.get_status_display }}
+                                            </span>
+
+                                        {% endif %}
+
+                                    </td>
+
+                                    <td>
+
+                                        {{ chamado.data_abertura|date:"d/m/Y H:i" }}
+
+                                    </td>
+
+                                    <td>
+
+                                        <a
+                                            href="{% url 'detalhe_chamado' chamado.id %}"
+                                            class="btn-detalhes"
+                                        >
+                                            Detalhes
+                                        </a>
+
+                                    </td>
+
+                                </tr>
+
+                            {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            {% else %}
+
+                <div class="sem-chamados">
+
+                    Nenhum chamado encontrado para este filtro.
+
+                </div>
+
+            {% endif %}
+
+        </div>
+
+    </main>
+
+</body>
+
+</html>
